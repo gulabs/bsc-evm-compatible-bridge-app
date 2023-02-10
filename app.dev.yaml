@@ -1,6 +1,6 @@
 runtime: nodejs16
 env: standard
-service: default
+service: bsc-evm-compatible-bridge-app-dev
 
 handlers:
   - url: /.*
