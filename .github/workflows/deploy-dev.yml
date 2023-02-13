@@ -52,7 +52,7 @@ jobs:
         env:
           REACT_APP_COVALENT_API_KEY: "************"
 
-          REACT_APP_API_URL: "https://bifrost-api.dev.nft-bridge.gu.net"
+          REACT_APP_API_URL: "http://34.84.189.192:3030"
 
           REACT_APP_UNSTOPPABLEDOMAIN_CLIENT_ID: "************"
           REACT_APP_UNSTOPPABLEDOMAIN_CLIENT_SECRET: "************"
