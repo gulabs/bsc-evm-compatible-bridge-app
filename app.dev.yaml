@@ -1,0 +1,9 @@
+runtime: nodejs16
+env: standard
+service: bsc-evm-compatible-bridge-app-dev
+
+handlers:
+  - url: /.*
+    secure: always
+    redirect_http_response_code: 301
+    script: auto

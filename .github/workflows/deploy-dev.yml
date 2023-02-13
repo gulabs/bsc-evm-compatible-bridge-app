@@ -1,0 +1,73 @@
+name: Deploy to dev environment
+on:
+  push:
+    branches:
+      - "main"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.actor }}
+  cancel-in-progress: true
+
+env:
+  PROJECT_ID: gu-bridge
+  SERVICE_ID: bsc-evm-compatible-bridge-app-dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14.x]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Cache .npm modules
+        uses: actions/cache@v1
+        with:
+          path: ~/.npm
+          key: v1-npm-deps-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: v1-npm-deps-
+
+      - name: Cache node modules
+        id: cache
+        uses: actions/cache@v1
+        with:
+          path: node_modules
+          key: v1-dependencies-${{ hashFiles('**/package.json') }}
+          restore-keys: |
+            v1-dependencies-
+
+      - name: Install npm modules
+        run: npm install
+
+      - name: Build
+        run: npm run build --if-present
+        env:
+          REACT_APP_COVALENT_API_KEY: "************"
+
+          REACT_APP_API_URL: "http://34.84.189.192:3003"
+
+          REACT_APP_UNSTOPPABLEDOMAIN_CLIENT_ID: "************"
+          REACT_APP_UNSTOPPABLEDOMAIN_CLIENT_SECRET: "************"
+
+          REACT_APP_URL: "************"
+
+      - name: Setup Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+          service_account_key: ${{ secrets.GCLOUD_SERVICE_KEY }}
+
+      - name: Deploy to App Engine
+        run: gcloud app deploy --appyaml=app.dev.yaml
+
+      - name: Delete old versions
+        run: gcloud app versions list --filter="service=${{env.SERVICE_ID}}" --format="value(version.id)" --sort-by="~version.createTime" | tail -n +11 | xargs -r gcloud app versions delete # Only keep 10 latest versions
+

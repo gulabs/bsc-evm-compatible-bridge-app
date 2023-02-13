@@ -1,0 +1,3 @@
+dispatch:
+  - url: dev.bsc-evm-compatible-bridge-app.gu.net/*
+    service: bsc-evm-compatible-bridge-app-dev
